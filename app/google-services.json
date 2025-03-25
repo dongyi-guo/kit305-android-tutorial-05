@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1065364705626",
+    "project_id": "kit721-dongyig",
+    "storage_bucket": "kit721-dongyig.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1065364705626:android:f85ea7da845065e60aa363",
+        "android_client_info": {
+          "package_name": "au.edu.utas.kit305.tutorial05"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDjzDr5Gz_aV5nRLiFAMnsLQPBE6dqIPE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
