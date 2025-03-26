@@ -30,6 +30,10 @@ class MovieDetails : AppCompatActivity() {
         val db = Firebase.firestore
         val moviesCollection = db.collection("movies")
 
+        ui.btnCancel.setOnClickListener {
+            finish()
+        }
+
         ui.btnSave.setOnClickListener {
             //get the user input
             movieObject.title = ui.txtTitle.text.toString()
@@ -44,6 +48,9 @@ class MovieDetails : AppCompatActivity() {
                     //return to the list
                     finish()
                 }
+                .addOnFailureListener(
+                    { Log.d(FIREBASE_TAG, "Failed to update movie", it) }
+                )
         }
     }
 }
