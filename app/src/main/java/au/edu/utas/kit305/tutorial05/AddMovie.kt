@@ -25,7 +25,7 @@ class AddMovie : AppCompatActivity() {
             insets
         }
 
-        ui.cancelBtn.setOnClickListener {
+        ui.cancelMovieBtn.setOnClickListener {
             finish()
         }
 

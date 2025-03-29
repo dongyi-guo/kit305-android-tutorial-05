@@ -23,14 +23,14 @@ class SearchMovie : AppCompatActivity() {
             insets
         }
 
-        ui.cancelFilterBtn.setOnClickListener {
+        ui.filterCancelBtn.setOnClickListener {
             finish()
         }
 
-        ui.clearAllBtn.setOnClickListener {
+        ui.clearAll.setOnClickListener {
             ui.keywordsText.text.clear()
-            ui.yearText.text.clear()
-            ui.lengthText.text.clear()
+            ui.yearNumber.text.clear()
+            ui.lengthNumber.text.clear()
         }
 
         ui.clearKeywords.setOnClickListener {
@@ -38,11 +38,15 @@ class SearchMovie : AppCompatActivity() {
         }
 
         ui.clearYear.setOnClickListener {
-            ui.yearText.text.clear()
+            ui.yearNumber.text.clear()
         }
 
         ui.clearLength.setOnClickListener {
-            ui.lengthText.text.clear()
+            ui.lengthNumber.text.clear()
+        }
+
+        ui.filterApplyBtn.setOnClickListener {
+            MainActivity.isFiltered = true
         }
     }
 }

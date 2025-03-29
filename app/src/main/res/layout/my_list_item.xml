@@ -4,39 +4,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="8dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/txtName"
-            android:layout_width="350dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TextView"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <TextView
             android:id="@+id/txtYear"
-            android:layout_width="350dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TextView"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            app:layout_constraintStart_toStartOf="@+id/txtName"
-            app:layout_constraintTop_toBottomOf="@+id/txtName" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+    </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/removeBtn"
-            android:layout_width="46dp"
-            android:layout_height="40dp"
-            android:background="#00FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/txtName"
-            app:layout_constraintTop_toTopOf="@+id/txtName"
-            app:srcCompat="@android:drawable/ic_delete" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageButton
+        android:id="@+id/removeBtn"
+        android:layout_width="45dp"
+        android:layout_height="52dp"
+        android:background="#00FFFFFF"
+        android:contentDescription="delete"
+        app:srcCompat="@android:drawable/ic_delete" />
 
 </LinearLayout>

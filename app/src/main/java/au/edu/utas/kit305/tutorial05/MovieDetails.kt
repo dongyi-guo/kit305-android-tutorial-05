@@ -48,9 +48,9 @@ class MovieDetails : AppCompatActivity() {
                     //return to the list
                     finish()
                 }
-                .addOnFailureListener(
-                    { Log.d(FIREBASE_TAG, "Failed to update movie", it) }
-                )
+                .addOnFailureListener {
+                    Log.d(FIREBASE_TAG, "Failed to update movie", it)
+                }
         }
     }
 }

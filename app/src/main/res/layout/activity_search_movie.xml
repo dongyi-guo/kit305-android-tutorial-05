@@ -9,93 +9,98 @@
 
     <EditText
         android:id="@+id/keywordsText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="16dp"
         android:ems="10"
         android:hint="Keywords"
         android:inputType="text"
         android:minHeight="48dp"
+        app:layout_constraintEnd_toStartOf="@+id/clearKeywords"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/yearText"
-        android:layout_width="wrap_content"
+        android:id="@+id/yearNumber"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="Year"
         android:inputType="number"
         android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="@+id/keywordsText"
         app:layout_constraintStart_toStartOf="@+id/keywordsText"
         app:layout_constraintTop_toBottomOf="@+id/keywordsText" />
 
     <EditText
-        android:id="@+id/lengthText"
-        android:layout_width="wrap_content"
+        android:id="@+id/lengthNumber"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="Length (In Minutes)"
         android:inputType="number"
         android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="@+id/keywordsText"
         app:layout_constraintStart_toStartOf="@+id/keywordsText"
-        app:layout_constraintTop_toBottomOf="@+id/yearText" />
+        app:layout_constraintTop_toBottomOf="@+id/yearNumber" />
 
     <Button
         android:id="@+id/clearKeywords"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
+        android:layout_marginEnd="24dp"
         android:text="Clear"
         app:layout_constraintBottom_toBottomOf="@+id/keywordsText"
-        app:layout_constraintStart_toEndOf="@+id/keywordsText" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/keywordsText"
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/clearYear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Clear"
-        app:layout_constraintBottom_toBottomOf="@+id/yearText"
-        app:layout_constraintStart_toStartOf="@+id/clearKeywords" />
+        app:layout_constraintBottom_toBottomOf="@+id/yearNumber"
+        app:layout_constraintStart_toStartOf="@+id/clearKeywords"
+        app:layout_constraintTop_toTopOf="@+id/yearNumber" />
 
     <Button
         android:id="@+id/clearLength"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Clear"
-        app:layout_constraintBottom_toBottomOf="@+id/lengthText"
-        app:layout_constraintStart_toStartOf="@+id/clearKeywords" />
+        app:layout_constraintBottom_toBottomOf="@+id/lengthNumber"
+        app:layout_constraintStart_toStartOf="@+id/clearKeywords"
+        app:layout_constraintTop_toTopOf="@+id/lengthNumber" />
+
+    <Button
+        android:id="@+id/clearAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Clear All Filters"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lengthNumber" />
 
     <Button
         android:id="@+id/filterApplyBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="56dp"
         android:text="Apply Filter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cancelFilterBtn" />
+        app:layout_constraintEnd_toEndOf="@+id/clearLength"
+        app:layout_constraintTop_toTopOf="@+id/filterCancelBtn" />
 
     <Button
-        android:id="@+id/cancelFilterBtn"
+        android:id="@+id/filterCancelBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="440dp"
         android:text="Clear and Cancel"
-        app:layout_constraintEnd_toStartOf="@+id/filterApplyBtn"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lengthText" />
-
-    <Button
-        android:id="@+id/clearAllBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Clear All"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lengthText" />
+        app:layout_constraintStart_toStartOf="@+id/lengthNumber"
+        app:layout_constraintTop_toBottomOf="@+id/lengthNumber" />
 </androidx.constraintlayout.widget.ConstraintLayout>

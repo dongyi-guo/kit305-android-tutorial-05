@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
@@ -19,18 +20,23 @@ import com.google.firebase.firestore.toObject
 
 val items: MutableList<Movie> = mutableListOf()
 const val FIREBASE_TAG = "FirebaseLogging"
-const val LOADING_TXT = "Loading..."
 const val MOVIE_INDEX = "Movie_Index"
 
 class MainActivity : AppCompatActivity()
 {
     private lateinit var ui : ActivityMainBinding
 
-    @SuppressLint("SetTextI18n")
+    companion object{
+        var isFiltered = false
+    }
+
+    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         ui = ActivityMainBinding.inflate(layoutInflater)
+        ui.myList.adapter = MovieAdapter(movies = items)
+        ui.myList.layoutManager = LinearLayoutManager(this)
         setContentView(ui.root)
         ViewCompat.setOnApplyWindowInsetsListener(ui.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -43,16 +49,17 @@ class MainActivity : AppCompatActivity()
             startActivity(i)
         }
 
-        ui.searchBtn.setOnClickListener {
+        ui.filterBtn.setOnClickListener {
             val i = Intent(this, SearchMovie::class.java)
             startActivity(i)
         }
 
-        ui.lblMovieCount.text = "${items.size} Movies"
-        ui.myList.adapter = MovieAdapter(movies = items)
-
-        //vertical list
-        ui.myList.layoutManager = LinearLayoutManager(this)
+        ui.removeFilterBtn.setOnClickListener {
+            isFiltered = false
+            ui.removeFilterBtn.visibility = View.GONE
+            (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
+        }
+        ui.removeFilterBtn.visibility = View.GONE
 
         val db = Firebase.firestore
         Log.d(FIREBASE_TAG, "Firebase Connected: ${db.app.name}")
@@ -93,13 +100,13 @@ class MainActivity : AppCompatActivity()
                     Log.e(FIREBASE_TAG, "Error writing document", it)
                 }
         }
-        writeData(lotr)
-        writeData(hpstone)
-        writeData(fastFurious)
-        writeData(fastFurious2)
+//        writeData(lotr)
+//        writeData(hpstone)
+//        writeData(fastFurious)
+//        writeData(fastFurious2)
 
         // Retrieve all movies
-        ui.lblMovieCount.text = LOADING_TXT
+
         moviesCollection
             .get()
             .addOnSuccessListener { result ->
@@ -150,33 +157,40 @@ class MainActivity : AppCompatActivity()
             holder.ui.txtYear.text = movie.year.toString()
 
             holder.ui.root.setOnClickListener {
-                Log.d("CLICKING_VIEW", "Clicked on ${movie.title}")
-                val i = Intent(this@MainActivity, MovieDetails::class.java)
-                i.putExtra(MOVIE_INDEX, position)
-                startActivity(i)
+                val currentPosition = holder.adapterPosition
+                if (currentPosition != RecyclerView.NO_POSITION){
+                    Log.d("CLICKING_VIEW", "Clicked on ${movie.title}")
+                    val i = Intent(this@MainActivity, MovieDetails::class.java)
+                    i.putExtra(MOVIE_INDEX, currentPosition)
+                    startActivity(i)
+                }
             }
 
             holder.ui.removeBtn.setOnClickListener {
-                moviesCollection.document(movie.id!!).delete()
-                    .addOnSuccessListener {
-                        Log.d(FIREBASE_TAG, "Successfully deleted movie ${movie.id} at $position")
-                        items.removeAt(position)
-                        Log.d("INFO", items.size.toString())
-                        ui.lblMovieCount.text = "${items.size} Movies"
-                        (ui.myList.adapter as MovieAdapter).notifyItemRemoved(position)
-                    }
-                    .addOnFailureListener {
-                        Log.e(FIREBASE_TAG, "Error deleting document", it)
-                    }
+                val currentPosition = holder.adapterPosition
+                if (currentPosition != RecyclerView.NO_POSITION){
+                    moviesCollection.document(movie.id!!).delete()
+                        .addOnSuccessListener {
+                            Log.d(FIREBASE_TAG, "Successfully deleted movie ${movie.id} at $currentPosition")
+                            Log.d(FIREBASE_TAG, "CurrentPosition is $currentPosition and Position is $position")
+                            movies.removeAt(currentPosition)
+                            ui.lblMovieCount.text = "${movies.size} Movies"
+                            (ui.myList.adapter as MovieAdapter).notifyItemRemoved(currentPosition)
+                        }
+                        .addOnFailureListener {
+                            Log.e(FIREBASE_TAG, "Error deleting document", it)
+                        }
+                }
             }
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     override fun onResume() {
         super.onResume()
         ui.myList.adapter?.notifyDataSetChanged()
-    //without a more complicated set-up, we can't be more specific than "dataset changed"
+        ui.lblMovieCount.text = "${items.size} Movies"
+        ui.removeFilterBtn.visibility = if (isFiltered) View.VISIBLE else View.GONE
     }
 }
 
