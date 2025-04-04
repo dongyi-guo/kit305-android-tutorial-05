@@ -8,11 +8,15 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import au.edu.utas.kit305.tutorial05.databinding.ActivityMainBinding
+import au.edu.utas.kit305.tutorial05.databinding.ActivityMovieDetailsBinding
 import au.edu.utas.kit305.tutorial05.databinding.MyListItemBinding
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -20,6 +24,7 @@ import com.google.firebase.firestore.toObject
 
 val items: MutableList<Movie> = mutableListOf()
 const val FIREBASE_TAG = "FirebaseLogging"
+const val FILTER_TAG = "FilterMovies"
 const val MOVIE_INDEX = "Movie_Index"
 
 class MainActivity : AppCompatActivity()
@@ -29,6 +34,56 @@ class MainActivity : AppCompatActivity()
     companion object{
         var isFiltered = false
     }
+
+    private val getMovieHandler =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+        {
+            result: ActivityResult ->
+            Log.d("MainActivity", "Returned from Filter Settings")
+
+            if (result.resultCode == RESPONSE_CLEAR)
+            {
+                Log.d(FILTER_TAG, "No Filter Applied")
+            }
+            else if (result.resultCode == RESPONSE_APPLY)
+            {
+                Log.d(FIREBASE_TAG, "Filter Applied")
+                // Retrieve the filter values from the intent
+                val title = result.data!!.getStringExtra(MOVIE_TITLE)
+                val year = result.data!!.getStringExtra(MOVIE_YEAR)
+                val length = result.data!!.getStringExtra(MOVIE_LENGTH)
+                val db = Firebase.firestore
+                Log.d(FIREBASE_TAG, "Firebase Connected: ${db.app.name}")
+                val moviesCollection = db.collection("movies")
+
+                moviesCollection
+                    .get()
+                    .addOnSuccessListener { result ->
+                        items.clear()
+                        //this line clears the list,
+                        // and prevents a bug where items would be duplicated upon rotation of screen
+                        Log.d(FIREBASE_TAG, "--- all movies ---")
+                        for (document in result)
+                        {
+                            //Log.d(FIREBASE_TAG, document.toString())
+                            val movie = document.toObject<Movie>()
+                            movie.id = document.id
+                            Log.d(FIREBASE_TAG, movie.toString())
+
+                            items.add(movie)
+                        }
+                        ui.lblMovieCount.text = "${items.size} Movies"
+                        // (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
+                        //notifyDataSetChanged() is not specific enough. so using:
+                        (ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
+                    }
+            }
+            else
+            {
+                Log.e(FILTER_TAG, "Error: ${result.resultCode}")
+            }
+
+        }
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,14 +99,62 @@ class MainActivity : AppCompatActivity()
             insets
         }
 
+        val db = Firebase.firestore
+        // This is a ref for the collection, no internet activity has been done.
+        val moviesCollection = db.collection("movies")
+        Log.d(FIREBASE_TAG, "Firebase Connected: ${db.app.name}")
+
         ui.addBtn.setOnClickListener {
             val i = Intent(this, AddMovie::class.java)
             startActivity(i)
         }
 
+        // Reuse MovieDetails for both adding and editing
+        ui.addBtnPop.setOnClickListener {
+            // Build the dialog using the Movie Details Page's Layout
+            // Use AlertDialog.Builder(this)
+            val dialogUI = ActivityMovieDetailsBinding.inflate(layoutInflater)
+            val dialogBuilder = android.app.AlertDialog.Builder(this)
+            dialogBuilder.setView(dialogUI.root)
+            dialogBuilder.setTitle("Add Movie")
+
+            val addDialog = dialogBuilder.show()
+
+            dialogUI.btnCancel.setOnClickListener {
+                addDialog.dismiss()
+            }
+            dialogUI.btnSave.setOnClickListener {
+
+                if (dialogUI.txtTitle.text.isNotBlank() &&
+                    dialogUI.txtYear.text.isNotBlank() &&
+                    dialogUI.txtDuration.text.isNotBlank()) {
+
+                    //get the user input
+                    val title = dialogUI.txtTitle.text.toString()
+                    val year = dialogUI.txtYear.text.toString().toInt()
+                    val duration = dialogUI.txtDuration.text.toString().toFloat()
+
+                    //update the database
+                    val movie = Movie(title = title, year = year, duration = duration)
+                    moviesCollection.add(movie)
+                        .addOnSuccessListener {
+                            Log.d(FIREBASE_TAG, "Successfully added movie ${it.id}")
+                            movie.id = it.id
+                            items.add(movie)
+                            ui.lblMovieCount.text = "${items.size} Movies"
+                            ui.myList.adapter?.notifyDataSetChanged()
+                            addDialog.dismiss()
+                        }
+                        .addOnFailureListener {
+                            Log.d(FIREBASE_TAG, "Failed to add movie", it)
+                        }
+                    }
+            }
+        }
+
         ui.filterBtn.setOnClickListener {
             val i = Intent(this, SearchMovie::class.java)
-            startActivity(i)
+            getMovieHandler.launch(i)
         }
 
         ui.removeFilterBtn.setOnClickListener {
@@ -60,10 +163,6 @@ class MainActivity : AppCompatActivity()
             (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
         }
         ui.removeFilterBtn.visibility = View.GONE
-
-        val db = Firebase.firestore
-        Log.d(FIREBASE_TAG, "Firebase Connected: ${db.app.name}")
-        val moviesCollection = db.collection("movies")
 
         val lotr = Movie(
             title = "Lord of the Rings: Fellowship of the Ring",
@@ -128,7 +227,9 @@ class MainActivity : AppCompatActivity()
                 //notifyDataSetChanged() is not specific enough. so using:
                 (ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
             }
-//        Don't get size here, here happens after .addOnSuccessListener {}
+
+        // Don't get size here, here happens after .addOnSuccessListener {}
+
     }
 
     inner class MovieHolder(var ui: MyListItemBinding) : RecyclerView.ViewHolder(ui.root)
