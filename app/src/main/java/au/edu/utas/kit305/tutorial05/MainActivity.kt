@@ -69,9 +69,10 @@ class MainActivity : AppCompatActivity()
                             items.add(movie)
                         }
                         ui.lblMovieCount.text = "${items.size} Movies"
-                        // (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
-                        //notifyDataSetChanged() is not specific enough. so using:
-                        (ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
+                        (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
+
+                        //DON'T USE notifyItemRangeInserted(0, items.size) here! as you are refreshing! Not inserting!
+                        //(ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
                     }
             }
             else if (result.resultCode == RESPONSE_APPLY)
@@ -221,7 +222,8 @@ class MainActivity : AppCompatActivity()
                     }
                     ui.lblMovieCount.text = "${items.size} Movies"
                     (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
-                    //notifyDataSetChanged() is not specific enough. so using:
+
+                    //DON'T USE notifyItemRangeInserted(0, items.size) here! as you are refreshing! Not inserting!
                     //(ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
                 }
         }
