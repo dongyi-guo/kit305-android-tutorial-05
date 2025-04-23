@@ -91,7 +91,7 @@
         android:id="@+id/filterApplyBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Apply Filter"
+        android:text="Apply"
         app:layout_constraintEnd_toEndOf="@+id/clearLength"
         app:layout_constraintTop_toTopOf="@+id/filterCancelBtn" />
 
@@ -99,8 +99,8 @@
         android:id="@+id/filterCancelBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="440dp"
-        android:text="Clear and Cancel"
+        android:layout_marginTop="32dp"
+        android:text="@android:string/cancel"
         app:layout_constraintStart_toStartOf="@+id/lengthNumber"
-        app:layout_constraintTop_toBottomOf="@+id/lengthNumber" />
+        app:layout_constraintTop_toBottomOf="@id/clearAll" />
 </androidx.constraintlayout.widget.ConstraintLayout>

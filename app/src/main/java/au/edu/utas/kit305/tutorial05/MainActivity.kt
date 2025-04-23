@@ -12,7 +12,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import au.edu.utas.kit305.tutorial05.databinding.ActivityMainBinding
@@ -23,39 +22,36 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.toObject
 
 val items: MutableList<Movie> = mutableListOf()
-const val FIREBASE_TAG = "FirebaseLogging"
-const val FILTER_TAG = "FilterMovies"
-const val MOVIE_INDEX = "Movie_Index"
+const val FIREBASE_TAG = "FIREBASE"
+const val FILTER_TAG = "FILTER"
+const val MOVIE_INDEX = "MOVIE_INDEX"
+
+
 
 class MainActivity : AppCompatActivity()
 {
     private lateinit var ui : ActivityMainBinding
+    // This is a ref for the collection, no internet activity has been done.
+    val db = Firebase.firestore
+    val moviesCollection = db.collection("movies")
 
-    companion object{
+    companion object {
         var isFiltered = false
     }
 
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     private val getMovieHandler =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        )
         {
             result: ActivityResult ->
-            Log.d("MainActivity", "Returned from Filter Settings")
 
             if (result.resultCode == RESPONSE_CLEAR)
             {
                 Log.d(FILTER_TAG, "No Filter Applied")
-            }
-            else if (result.resultCode == RESPONSE_APPLY)
-            {
-                Log.d(FIREBASE_TAG, "Filter Applied")
-                // Retrieve the filter values from the intent
-                val title = result.data!!.getStringExtra(MOVIE_TITLE)
-                val year = result.data!!.getStringExtra(MOVIE_YEAR)
-                val length = result.data!!.getStringExtra(MOVIE_LENGTH)
-                val db = Firebase.firestore
-                Log.d(FIREBASE_TAG, "Firebase Connected: ${db.app.name}")
-                val moviesCollection = db.collection("movies")
-
+                ui.removeFilterBtn.visibility = View.GONE
+                // Retrieve all movies
                 moviesCollection
                     .get()
                     .addOnSuccessListener { result ->
@@ -78,6 +74,58 @@ class MainActivity : AppCompatActivity()
                         (ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
                     }
             }
+            else if (result.resultCode == RESPONSE_APPLY)
+            {
+                Log.d(FIREBASE_TAG, "Filter Applied")
+                ui.removeFilterBtn.visibility = View.VISIBLE
+                val data = result.data
+                Log.d(FILTER_TAG, "Data: $data")
+                if (null != data){
+                    if (isFiltered){
+                        moviesCollection
+                            .get()
+                            .addOnSuccessListener { result ->
+                                items.clear()
+                                //this line clears the list,
+                                // and prevents a bug where items would be duplicated upon rotation of screen
+                                Log.d(FIREBASE_TAG, "--- all movies ---")
+                                for (document in result) {
+                                    //Log.d(FIREBASE_TAG, document.toString())
+                                    val movie = document.toObject<Movie>()
+                                    movie.id = document.id
+                                    Log.d(FIREBASE_TAG, movie.toString())
+
+                                    items.add(movie)
+                                }
+                            }
+                    }
+                    val titleFilter = data.getStringExtra(MOVIE_TITLE).orEmpty()
+                    val yearFilter = data.getStringExtra(MOVIE_YEAR).orEmpty()
+                    val lengthFilter = data.getStringExtra(MOVIE_LENGTH).orEmpty()
+
+                    // Apply the filters
+                    isFiltered = true
+                    val filteredMovies = items.filter { movie ->
+                        (titleFilter.isBlank() || movie.title!!.contains(titleFilter, ignoreCase = true)) &&
+                        (yearFilter.isBlank() || movie.year.toString() == yearFilter) &&
+                        (lengthFilter.isBlank() || movie.duration.toString() == lengthFilter)
+                    }
+
+                    // Update the adapter with filtered movies
+                    (ui.myList.adapter as MovieAdapter).apply {
+                        items.clear()
+                        items.addAll(filteredMovies)
+                        ui.lblMovieCount.text = "${items.size} Movies"
+                        // (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
+                        //notifyDataSetChanged() is not specific enough. so using:
+                        (ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
+                    }
+                }
+                else
+                {
+                    Log.e(FILTER_TAG, "Error: No data returned")
+                }
+            }
             else
             {
                 Log.e(FILTER_TAG, "Error: ${result.resultCode}")
@@ -99,11 +147,6 @@ class MainActivity : AppCompatActivity()
             insets
         }
 
-        val db = Firebase.firestore
-        // This is a ref for the collection, no internet activity has been done.
-        val moviesCollection = db.collection("movies")
-        Log.d(FIREBASE_TAG, "Firebase Connected: ${db.app.name}")
-
         ui.addBtn.setOnClickListener {
             val i = Intent(this, AddMovie::class.java)
             startActivity(i)
@@ -124,7 +167,6 @@ class MainActivity : AppCompatActivity()
                 addDialog.dismiss()
             }
             dialogUI.btnSave.setOnClickListener {
-
                 if (dialogUI.txtTitle.text.isNotBlank() &&
                     dialogUI.txtYear.text.isNotBlank() &&
                     dialogUI.txtDuration.text.isNotBlank()) {
@@ -160,28 +202,49 @@ class MainActivity : AppCompatActivity()
         ui.removeFilterBtn.setOnClickListener {
             isFiltered = false
             ui.removeFilterBtn.visibility = View.GONE
-            (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
+            // Retrieve all movies
+            moviesCollection
+                .get()
+                .addOnSuccessListener { result ->
+                    items.clear()
+                    //this line clears the list,
+                    // and prevents a bug where items would be duplicated upon rotation of screen
+                    Log.d(FIREBASE_TAG, "--- all movies ---")
+                    for (document in result)
+                    {
+                        //Log.d(FIREBASE_TAG, document.toString())
+                        val movie = document.toObject<Movie>()
+                        movie.id = document.id
+                        Log.d(FIREBASE_TAG, movie.toString())
+
+                        items.add(movie)
+                    }
+                    ui.lblMovieCount.text = "${items.size} Movies"
+                    (ui.myList.adapter as MovieAdapter).notifyDataSetChanged()
+                    //notifyDataSetChanged() is not specific enough. so using:
+                    //(ui.myList.adapter as MovieAdapter).notifyItemRangeInserted(0, items.size)
+                }
         }
         ui.removeFilterBtn.visibility = View.GONE
 
         val lotr = Movie(
             title = "Lord of the Rings: Fellowship of the Ring",
             year = 2001,
-            duration = 9001F
+            duration = 103F
         )
-        val hpstone = Movie(
+        val hpStone = Movie(
             title = "Harry Potter and the Philosopher's Stone",
             year = 2001,
             duration = 152F
         )
 
-        val fastFurious = Movie(
+        val ff = Movie(
             title = "Fast and Furious",
             year = 2001,
             duration = 106F
         )
 
-        val fastFurious2 = Movie(
+        val ff2 = Movie(
             title = "Fast and Furious 2",
             year = 2003,
             duration = 107F
@@ -199,13 +262,8 @@ class MainActivity : AppCompatActivity()
                     Log.e(FIREBASE_TAG, "Error writing document", it)
                 }
         }
-//        writeData(lotr)
-//        writeData(hpstone)
-//        writeData(fastFurious)
-//        writeData(fastFurious2)
 
         // Retrieve all movies
-
         moviesCollection
             .get()
             .addOnSuccessListener { result ->
@@ -240,7 +298,7 @@ class MainActivity : AppCompatActivity()
         private val db = Firebase.firestore
         private val moviesCollection = db.collection("movies")
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
-                MainActivity.MovieHolder {
+                MovieHolder {
             val ui =
                 //inflate a new row from the my_list_item.xml
                 MyListItemBinding.inflate(layoutInflater, parent, false)
@@ -252,7 +310,7 @@ class MainActivity : AppCompatActivity()
         }
 
         @SuppressLint("SetTextI18n")
-        override fun onBindViewHolder(holder: MainActivity.MovieHolder, position: Int) {
+        override fun onBindViewHolder(holder: MovieHolder, position: Int) {
             val movie = movies[position]   //get the data at the requested position
             holder.ui.txtName.text = movie.title
             holder.ui.txtYear.text = movie.year.toString()

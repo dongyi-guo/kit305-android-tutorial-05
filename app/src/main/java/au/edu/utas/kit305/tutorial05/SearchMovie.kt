@@ -65,9 +65,9 @@ class SearchMovie : AppCompatActivity() {
                 setResult(RESPONSE_CLEAR)
             } else {
                 val intent = Intent().apply{
-                    putExtra(MOVIE_TITLE, ui.keywordsText.text!!.toString())
-                    putExtra(MOVIE_YEAR, ui.yearNumber.text!!.toString().toInt())
-                    putExtra(MOVIE_LENGTH, ui.lengthNumber.text!!.toString().toFloat())
+                    putExtra(MOVIE_TITLE, ui.keywordsText.text.toString())
+                    putExtra(MOVIE_YEAR, ui.yearNumber.text.toString())
+                    putExtra(MOVIE_LENGTH, ui.lengthNumber.text.toString())
                 }
                 MainActivity.isFiltered = true
                 setResult(RESPONSE_APPLY, intent)
