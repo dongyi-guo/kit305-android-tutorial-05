@@ -3,6 +3,7 @@ package au.edu.utas.kit305.tutorial05
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.OnBackPressedCallback
 import au.edu.utas.kit305.tutorial05.databinding.ActivityMovieDetailsBinding
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -16,6 +17,14 @@ class MovieDetails : AppCompatActivity() {
 
         val db = Firebase.firestore
         val moviesCollection = db.collection("movies")
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        })
+        ui.btnCancel.setOnClickListener {
+            finish()
+        }
 
         //Read in movie details and display on this screen
         //get movie object using id from intent
@@ -38,13 +47,6 @@ class MovieDetails : AppCompatActivity() {
             // because it will try to find pre-defined string variable's location!
             ui.txtYear.setText(year.toString())
             ui.txtDuration.setText(duration.toString())
-
-            // Post changes to the database
-
-
-            ui.btnCancel.setOnClickListener {
-                finish()
-            }
 
             ui.btnSave.setOnClickListener {
                 //get the user input

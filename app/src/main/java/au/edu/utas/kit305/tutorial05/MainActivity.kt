@@ -127,6 +127,10 @@ class MainActivity : AppCompatActivity()
                     Log.e(FILTER_TAG, "Error: No data returned")
                 }
             }
+            else if (result.resultCode == RESULT_CANCELED)
+            {
+                Log.d(FILTER_TAG, "User cancelled changing filter")
+            }
             else
             {
                 Log.e(FILTER_TAG, "Error: ${result.resultCode}")

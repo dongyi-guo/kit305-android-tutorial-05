@@ -2,6 +2,7 @@ package au.edu.utas.kit305.tutorial05
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -9,8 +10,8 @@ import androidx.core.view.WindowInsetsCompat
 import au.edu.utas.kit305.tutorial05.databinding.ActivitySearchMovieBinding
 
 
-const val RESPONSE_CLEAR = 0
-const val RESPONSE_APPLY = 1
+const val RESPONSE_CLEAR = 3
+const val RESPONSE_APPLY = 2
 const val MOVIE_TITLE = "movie_title"
 const val MOVIE_YEAR = "movie_year"
 const val MOVIE_LENGTH = "movie_length"
@@ -29,6 +30,13 @@ class SearchMovie : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                setResult(RESULT_CANCELED)
+                finish()
+            }
+        })
 
         ui.filterCancelBtn.setOnClickListener {
             ui.keywordsText.text.clear()
